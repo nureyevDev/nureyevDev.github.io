@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="pt-br" class="scroll-smooth">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nureyev Alencar | Desenvolvedor(a) Python</title>
+<meta name="description" content="Portfólio de desenvolvedor(a) Python com playground interativo rodando no navegador e integração com API do GitHub">
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<!-- Pyodide: executa Python de verdade dentro do navegador (WebAssembly) -->
+<script src="https://cdn.jsdelivr.net/pyodide/v0.26.2/full/pyodide.js"></script>
+<style>
+  * { font-family: 'Inter', sans-serif; }
+  .mono { font-family: 'JetBrains Mono', monospace; }
+  html { transition: background-color .3s ease, color .3s ease; }
+
+  .gradient-text {
+    background: linear-gradient(90deg,#3776ab,#ffd43b,#22d3ee);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .glow { box-shadow: 0 0 0 1px rgba(55,118,171,.25), 0 10px 40px -10px rgba(255,212,59,.25); }
+
+  .card-hover { transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease; }
+  .card-hover:hover {
+    transform: translateY(-6px);
+    border-color: rgba(255,212,59,.5);
+    box-shadow: 0 20px 40px -15px rgba(55,118,171,.35);
+  }
+
+  .typing::after { content: '|'; animation: blink 1s step-end infinite; color: #ffd43b; }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  ::-webkit-scrollbar { width: 10px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #3776ab; border-radius: 10px; }
+
+  .skill-bar { transition: width 1.2s ease; }
+  .fade-in { opacity: 0; transform: translateY(24px); transition: opacity .7s ease, transform .7s ease; }
+  .fade-in.show { opacity: 1; transform: translateY(0); }
+
+  .loader {
+    border: 3px solid rgba(55,118,171,.2);
+    border-top-color: #ffd43b;
+    border-radius: 50%;
+    width: 32px; height: 32px;
+    animation: spin 0.9s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .lang-dot { width: 10px; height: 10px; border-radius: 999px; display:inline-block; }
+
+  #pyOutput { white-space: pre-wrap; word-break: break-word; }
+  textarea#pyCode { tab-size: 4; }
+  .badge { font-size: .65rem; letter-spacing:.05em; }
+</style>
+</head>
+<body class="bg-slate-950 text-slate-200 antialiased">
+
+<!-- NAVBAR -->
+<header class="fixed top-0 left-0 w-full z-50 backdrop-blur-lg bg-slate-950/70 border-b border-white/5">
+  <nav class="max-w-6xl mx-auto flex items-center justify-between px-5 py-4">
+    <a href="#home" class="text-lg font-extrabold tracking-tight">
+      <span class="gradient-text">&gt;_ Py</span><span class="text-white">Folio</span>
+    </a>
+    <div class="hidden md:flex items-center gap-8 text-sm font-medium">
+      <a href="#sobre" class="hover:text-yellow-400 transition">Sobre</a>
+      <a href="#playground" class="hover:text-yellow-400 transition">Playground Python</a>
+      <a href="#skills" class="hover:text-yellow-400 transition">Skills</a>
+      <a href="#projetos" class="hover:text-yellow-400 transition">Projetos</a>
+      <a href="#api" class="hover:text-yellow-400 transition">API Demo</a>
+      <a href="#contato" class="hover:text-yellow-400 transition">Contato</a>
+    </div>
+    <div class="flex items-center gap-3">
+      <button id="themeToggle" aria-label="Alternar tema" class="w-9 h-9 grid place-items-center rounded-full bg-white/5 hover:bg-white/10 border border-white/10 transition">
+        <span id="themeIcon">🌙</span>
+      </button>
+      <button id="menuBtn" class="md:hidden w-9 h-9 grid place-items-center rounded-full bg-white/5 border border-white/10">
+        <span class="text-lg">☰</span>
+      </button>
+    </div>
+  </nav>
+  <div id="mobileMenu" class="hidden md:hidden flex-col gap-1 px-5 pb-4 text-sm font-medium bg-slate-950/95 border-b border-white/5">
+    <a href="#sobre" class="block py-2">Sobre</a>
+    <a href="#playground" class="block py-2">Playground Python</a>
+    <a href="#skills" class="block py-2">Skills</a>
+    <a href="#projetos" class="block py-2">Projetos</a>
+    <a href="#api" class="block py-2">API Demo</a>
+    <a href="#contato" class="block py-2">Contato</a>
+  </div>
+</header>
+
+<!-- HERO -->
+<section id="home" class="relative min-h-screen flex items-center pt-24 pb-16 overflow-hidden">
+  <div class="absolute inset-0 -z-10">
+    <div class="absolute -top-24 -left-24 w-96 h-96 bg-blue-600/20 rounded-full blur-3xl"></div>
+    <div class="absolute bottom-0 right-0 w-96 h-96 bg-yellow-400/10 rounded-full blur-3xl"></div>
+  </div>
+  <div class="max-w-6xl mx-auto px-5 grid md:grid-cols-2 gap-10 items-center w-full">
+    <div class="fade-in">
+      <p class="mono text-yellow-400 mb-3">>>> import desenvolvedor</p>
+      <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight mb-4">
+        Nureyev Alencar <br> <span class="gradient-text">Desenvolvedor(a) Python</span>
+      </h1>
+      <p class="text-lg text-slate-400 mb-2 h-8">
+        <span id="typing" class="typing text-slate-200 mono"></span>
+      </p>
+      <p class="text-slate-400 max-w-lg mb-8">
+        Estudante de Desenvolvimento de Sistemas focado(a) em <strong class="text-slate-200">Python</strong>.
+        Este site não é só um portfólio — role até o <strong class="text-slate-200">Playground</strong> abaixo
+        e execute código Python de verdade, rodando ao vivo no seu navegador.
+      </p>
+      <div class="flex flex-wrap gap-4">
+        <a href="#playground" class="px-6 py-3 rounded-lg bg-blue-600 hover:bg-blue-500 transition font-semibold glow">▶ Rodar Python agora</a>
+        <a href="#contato" class="px-6 py-3 rounded-lg border border-white/15 hover:border-yellow-400 hover:text-yellow-300 transition font-semibold">Entrar em Contato</a>
+      </div>
+      <div class="flex gap-5 mt-8 text-2xl">
+        <a href="https://github.com/nureyevDev" target="_blank" class="hover:text-yellow-400 transition" title="GitHub">🐙</a>
+        <a href="https://www.linkedin.com/in/nureyev-alencar-108495418" target="_blank" class="hover:text-yellow-400 transition" title="LinkedIn">💼</a>
+        <a href="mailto:nureyev.dev@gmail.com" class="hover:text-yellow-400 transition" title="E-mail">✉️</a>
+      </div>
+    </div>
+    <div class="fade-in flex justify-center">
+      <div class="relative w-64 h-64 sm:w-80 sm:h-80">
+        <div class="absolute inset-0 rounded-full bg-gradient-to-tr from-blue-500 to-yellow-400 blur-2xl opacity-30"></div>
+        <img id="avatarImg" src="https://avatars.githubusercontent.com/nureyevDev" alt="Foto de perfil" class="relative w-full h-full object-cover rounded-full border-4 border-blue-500/40 glow bg-slate-900 transition-opacity duration-500">
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SOBRE -->
+<section id="sobre" class="py-24 border-t border-white/5">
+  <div class="max-w-6xl mx-auto px-5 grid md:grid-cols-2 gap-12 items-center">
+    <div class="fade-in">
+      <h2 class="text-3xl font-bold mb-2">Sobre <span class="gradient-text">mim</span></h2>
+      <div class="w-16 h-1 bg-blue-500 rounded mb-6"></div>
+      <p class="text-slate-400 mb-4 leading-relaxed">
+        Sou estudante do curso de Desenvolvimento de Sistemas e atualmente estou aprofundando meus
+        estudos em <strong class="text-slate-200">Python</strong>: lógica de programação, estruturas de
+        dados, orientação a objetos e desenvolvimento de APIs com Flask/FastAPI.
+      </p>
+      <p class="text-slate-400 mb-6 leading-relaxed">
+        Como o GitHub Pages só hospeda sites estáticos, usei <strong class="text-slate-200">Pyodide</strong>
+        (Python rodando via WebAssembly) para trazer Python de verdade para dentro deste site — sem precisar
+        de servidor. Também deixei uma seção pronta para consumir uma API própria feita em Python assim que
+        eu finalizar o deploy dela.
+      </p>
+      <div class="grid grid-cols-3 gap-4 text-center">
+        <div class="p-4 rounded-xl bg-white/5 border border-white/10">
+          <p class="text-2xl font-extrabold text-yellow-400" id="statRepos">--</p>
+          <p class="text-xs text-slate-400 mt-1">Repositórios</p>
+        </div>
+        <div class="p-4 rounded-xl bg-white/5 border border-white/10">
+          <p class="text-2xl font-extrabold text-yellow-400" id="statFollowers">--</p>
+          <p class="text-xs text-slate-400 mt-1">Seguidores</p>
+        </div>
+        <div class="p-4 rounded-xl bg-white/5 border border-white/10">
+          <p class="text-2xl font-extrabold text-yellow-400" id="statStars">--</p>
+          <p class="text-xs text-slate-400 mt-1">Estrelas</p>
+        </div>
+      </div>
+    </div>
+    <div class="fade-in">
+      <div class="rounded-2xl bg-slate-900 border border-white/10 p-6 mono text-sm shadow-xl">
+        <div class="flex gap-2 mb-4">
+          <span class="w-3 h-3 rounded-full bg-red-500"></span>
+          <span class="w-3 h-3 rounded-full bg-yellow-500"></span>
+          <span class="w-3 h-3 rounded-full bg-green-500"></span>
+        </div>
+<pre class="text-slate-400 whitespace-pre-wrap"><span class="text-blue-400">class</span> <span class="text-yellow-300">Desenvolvedor</span>:
+    <span class="text-blue-400">def</span> <span class="text-cyan-300">__init__</span>(self):
+        self.nome = <span class="text-emerald-400">"Nureyev Alencar"</span>
+        self.foco = <span class="text-emerald-400">"Python"</span>
+        self.stack = [<span class="text-emerald-400">"Python"</span>, <span class="text-emerald-400">"Flask"</span>, <span class="text-emerald-400">"FastAPI"</span>, <span class="text-emerald-400">"SQL"</span>]
+        self.buscando_vaga = <span class="text-purple-400">True</span></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PLAYGROUND PYTHON (Pyodide) -->
+<section id="playground" class="py-24 border-t border-white/5 bg-white/[0.02]">
+  <div class="max-w-6xl mx-auto px-5">
+    <div class="text-center mb-10 fade-in">
+      <span class="badge inline-block px-3 py-1 rounded-full bg-blue-500/15 text-blue-300 border border-blue-500/30 uppercase mb-4">Diferencial</span>
+      <h2 class="text-3xl font-bold mb-2">Playground <span class="gradient-text">Python ao vivo</span></h2>
+      <p class="text-slate-400 max-w-2xl mx-auto">
+        Isso não é uma simulação — é <strong class="text-slate-200">Python real</strong> rodando no seu
+        navegador via WebAssembly (Pyodide). Escolha um exemplo ou escreva seu próprio código e clique em Executar.
+      </p>
+      <div class="w-16 h-1 bg-blue-500 rounded mx-auto mt-4"></div>
+    </div>
+
+    <div class="fade-in grid lg:grid-cols-2 gap-6">
+      <div class="rounded-2xl bg-slate-900 border border-white/10 p-5">
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
+          <div class="flex gap-2">
+            <span class="w-3 h-3 rounded-full bg-red-500"></span>
+            <span class="w-3 h-3 rounded-full bg-yellow-500"></span>
+            <span class="w-3 h-3 rounded-full bg-green-500"></span>
+          </div>
+          <select id="exampleSelect" class="bg-slate-800 border border-white/10 rounded-lg px-3 py-1.5 text-sm mono outline-none">
+            <option value="fib">Fibonacci</option>
+            <option value="sort">Bubble Sort</option>
+            <option value="primo">Verificador de Primos</option>
+            <option value="palindromo">Verificador de Palíndromo</option>
+            <option value="custom">Código em branco</option>
+          </select>
+        </div>
+        <textarea id="pyCode" spellcheck="false" class="w-full h-64 bg-slate-950 border border-white/10 rounded-lg p-4 mono text-sm text-emerald-300 outline-none focus:border-blue-500 transition resize-none"></textarea>
+        <div class="flex items-center gap-3 mt-4">
+          <button id="runBtn" class="px-6 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 transition font-semibold flex items-center gap-2 disabled:opacity-50">
+            <span id="runIcon">▶</span> <span id="runLabel">Executar</span>
+          </button>
+          <span id="pyStatus" class="text-xs text-slate-500 mono">Carregando ambiente Python (Pyodide)...</span>
+        </div>
+      </div>
+
+      <div class="rounded-2xl bg-slate-900 border border-white/10 p-5 flex flex-col">
+        <p class="text-xs text-slate-500 mono mb-2 uppercase tracking-wider">Saída / Console</p>
+        <div id="pyOutput" class="mono text-sm text-slate-300 bg-slate-950 border border-white/10 rounded-lg p-4 flex-1 min-h-64 overflow-auto">Aguardando execução...</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SKILLS -->
+<section id="skills" class="py-24 border-t border-white/5">
+  <div class="max-w-6xl mx-auto px-5">
+    <div class="text-center mb-14 fade-in">
+      <h2 class="text-3xl font-bold mb-2">Minhas <span class="gradient-text">Habilidades</span></h2>
+      <div class="w-16 h-1 bg-blue-500 rounded mx-auto"></div>
+    </div>
+    <div class="grid md:grid-cols-2 gap-x-12 gap-y-6 fade-in" id="skillsList"></div>
+  </div>
+</section>
+
+<!-- PROJETOS (GitHub API) -->
+<section id="projetos" class="py-24 border-t border-white/5 bg-white/[0.02]">
+  <div class="max-w-6xl mx-auto px-5">
+    <div class="text-center mb-14 fade-in">
+      <h2 class="text-3xl font-bold mb-2">Meus <span class="gradient-text">Projetos</span></h2>
+      <p class="text-slate-400 mono text-sm">carregados dinamicamente via GitHub REST API</p>
+      <div class="w-16 h-1 bg-blue-500 rounded mx-auto mt-4"></div>
+    </div>
+    <div id="reposLoading" class="flex justify-center py-10"><div class="loader"></div></div>
+    <div id="reposError" class="hidden text-center text-red-400 mono text-sm"></div>
+    <div id="reposEmptyNote" class="hidden text-center text-slate-400 max-w-xl mx-auto mb-8">
+      Ainda estou construindo meu portfólio de projetos no GitHub — enquanto isso, teste o
+      <a href="#playground" class="text-yellow-400 underline">Playground Python</a> acima para ver código real em ação. 🚀
+    </div>
+    <div id="reposGrid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+  </div>
+</section>
+
+<!-- API DEMO -->
+<section id="api" class="py-24 border-t border-white/5">
+  <div class="max-w-6xl mx-auto px-5">
+    <div class="text-center mb-14 fade-in">
+      <span class="badge inline-block px-3 py-1 rounded-full bg-yellow-500/15 text-yellow-300 border border-yellow-500/30 uppercase mb-4">Full-stack</span>
+      <h2 class="text-3xl font-bold mb-2">Minha API em <span class="gradient-text">Python</span></h2>
+      <p class="text-slate-400 max-w-2xl mx-auto">
+        Esta seção consome uma API própria feita com <strong class="text-slate-200">Flask/FastAPI</strong>,
+        hospedada gratuitamente (Render, Railway ou PythonAnywhere). Basta configurar a URL no JavaScript.
+      </p>
+      <div class="w-16 h-1 bg-yellow-500 rounded mx-auto mt-4"></div>
+    </div>
+    <div class="fade-in grid md:grid-cols-2 gap-8 items-start">
+      <div class="rounded-2xl bg-slate-900 border border-white/10 p-6">
+        <p class="text-sm text-slate-400 mb-4">Clique para chamar o endpoint <span class="mono text-yellow-400">/api/status</span> da minha API Python:</p>
+        <button id="apiBtn" class="px-6 py-3 rounded-lg bg-yellow-500/90 hover:bg-yellow-500 text-slate-900 font-semibold transition mb-4">Chamar API Python</button>
+        <div id="apiResult" class="mono text-sm bg-slate-950 border border-white/10 rounded-lg p-4 text-slate-300 min-h-24">Aguardando requisição...</div>
+      </div>
+      <div class="rounded-2xl bg-slate-900 border border-white/10 p-6 mono text-xs sm:text-sm overflow-x-auto">
+<pre class="text-slate-400"><span class="text-purple-400">from</span> flask <span class="text-purple-400">import</span> Flask, jsonify
+<span class="text-purple-400">from</span> flask_cors <span class="text-purple-400">import</span> CORS
+
+app = Flask(__name__)
+CORS(app)
+
+<span class="text-slate-500"># Rota consumida pelo site em produção</span>
+@app.route(<span class="text-emerald-400">"/api/status"</span>)
+<span class="text-purple-400">def</span> <span class="text-cyan-300">status</span>():
+    <span class="text-purple-400">return</span> jsonify({
+        <span class="text-emerald-400">"status"</span>: <span class="text-emerald-400">"online"</span>,
+        <span class="text-emerald-400">"linguagem"</span>: <span class="text-emerald-400">"Python 3"</span>,
+        <span class="text-emerald-400">"framework"</span>: <span class="text-emerald-400">"Flask"</span>,
+    })
+
+<span class="text-purple-400">if</span> __name__ == <span class="text-emerald-400">"__main__"</span>:
+    app.run()</pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- GITHUB STATS -->
+<section id="github" class="py-24 border-t border-white/5 bg-white/[0.02]">
+  <div class="max-w-6xl mx-auto px-5">
+    <div class="text-center mb-14 fade-in">
+      <h2 class="text-3xl font-bold mb-2">Estatísticas do <span class="gradient-text">GitHub</span></h2>
+      <div class="w-16 h-1 bg-blue-500 rounded mx-auto"></div>
+    </div>
+    <div class="grid md:grid-cols-2 gap-8 items-start">
+      <div class="fade-in">
+        <h3 class="font-semibold mb-4">Linguagens mais usadas</h3>
+        <div id="langList" class="space-y-3"></div>
+      </div>
+      <div class="fade-in flex flex-col gap-4">
+        <img class="w-full rounded-xl border border-white/10" id="statsCard" src="" alt="GitHub stats card">
+        <img class="w-full rounded-xl border border-white/10" id="streakCard" src="" alt="GitHub streak card">
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTATO -->
+<section id="contato" class="py-24 border-t border-white/5">
+  <div class="max-w-4xl mx-auto px-5">
+    <div class="text-center mb-12 fade-in">
+      <h2 class="text-3xl font-bold mb-2">Vamos <span class="gradient-text">Conversar?</span></h2>
+      <p class="text-slate-400">Estou disponível para estágio, oportunidades júnior e projetos com Python.</p>
+      <div class="w-16 h-1 bg-blue-500 rounded mx-auto mt-4"></div>
+    </div>
+    <form id="contactForm" class="fade-in grid gap-5 bg-white/5 border border-white/10 p-8 rounded-2xl" action="https://formspree.io/f/xwlenqqy" method="POST">
+      <div class="grid sm:grid-cols-2 gap-5">
+        <input required name="nome" type="text" placeholder="Seu nome" class="bg-slate-900 border border-white/10 rounded-lg px-4 py-3 outline-none focus:border-blue-500 transition">
+        <input required name="email" type="email" placeholder="Seu e-mail" class="bg-slate-900 border border-white/10 rounded-lg px-4 py-3 outline-none focus:border-blue-500 transition">
+      </div>
+      <input required name="assunto" type="text" placeholder="Assunto" class="bg-slate-900 border border-white/10 rounded-lg px-4 py-3 outline-none focus:border-blue-500 transition">
+      <textarea required name="mensagem" rows="5" placeholder="Sua mensagem" class="bg-slate-900 border border-white/10 rounded-lg px-4 py-3 outline-none focus:border-blue-500 transition"></textarea>
+      <button type="submit" class="justify-self-start px-8 py-3 rounded-lg bg-blue-600 hover:bg-blue-500 transition font-semibold glow">Enviar mensagem</button>
+      <p id="formMsg" class="text-sm hidden"></p>
+    </form>
+  </div>
+</section>
+
+<footer class="py-8 text-center text-slate-500 text-sm border-t border-white/5">
+  <p>Feito com 🐍 por <span class="text-slate-300">Nureyev Alencar</span> • <span id="year"></span></p>
+  <p class="mono text-xs mt-1">HTML · Tailwind CSS · JavaScript · Pyodide · GitHub REST API</p>
+</footer>
+
+<script>
+/* ======================================================
+   CONFIGURAÇÃO — troque pelos seus dados reais
+====================================================== */
+const GITHUB_USERNAME = "nureyevDev";  // <-- troque pelo seu usuário do GitHub
+const PYTHON_API_URL  = "";            // <-- ex: "https://sua-api.onrender.com/api/status" (deixe vazio para simular)
+
+/* ======================================================
+   TEMA CLARO/ESCURO
+====================================================== */
+const themeToggle = document.getElementById('themeToggle');
+const themeIcon = document.getElementById('themeIcon');
+function applyTheme(mode){
+  if(mode === 'light'){
+    document.body.classList.remove('bg-slate-950','text-slate-200');
+    document.body.classList.add('bg-slate-50','text-slate-800');
+    themeIcon.textContent = '☀️';
+  } else {
+    document.body.classList.add('bg-slate-950','text-slate-200');
+    document.body.classList.remove('bg-slate-50','text-slate-800');
+    themeIcon.textContent = '🌙';
+  }
+  localStorage.setItem('theme', mode);
+}
+themeToggle.addEventListener('click', () => {
+  const current = localStorage.getItem('theme') === 'light' ? 'dark' : 'light';
+  applyTheme(current);
+});
+applyTheme(localStorage.getItem('theme') || 'dark');
+
+/* MENU MOBILE */
+const menuBtn = document.getElementById('menuBtn');
+const mobileMenu = document.getElementById('mobileMenu');
+menuBtn.addEventListener('click', () => {
+  mobileMenu.classList.toggle('hidden');
+  mobileMenu.classList.toggle('flex');
+});
+mobileMenu.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
+  mobileMenu.classList.add('hidden'); mobileMenu.classList.remove('flex');
+}));
+
+document.getElementById('year').textContent = new Date().getFullYear();
+
+/* EFEITO DE DIGITAÇÃO */
+const phrases = ["Python", "Flask & FastAPI", "Lógica de programação", "APIs REST", "Automação de tarefas"];
+let pIndex = 0, cIndex = 0, deleting = false;
+const typingEl = document.getElementById('typing');
+function typeLoop(){
+  const current = phrases[pIndex];
+  if(!deleting){
+    typingEl.textContent = current.slice(0, ++cIndex);
+    if(cIndex === current.length){ deleting = true; setTimeout(typeLoop, 1200); return; }
+  } else {
+    typingEl.textContent = current.slice(0, --cIndex);
+    if(cIndex === 0){ deleting = false; pIndex = (pIndex+1) % phrases.length; }
+  }
+  setTimeout(typeLoop, deleting ? 50 : 90);
+}
+typeLoop();
+
+/* FADE-IN AO SCROLL */
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('show'); });
+}, { threshold: 0.15 });
+document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+/* SKILLS (foco em Python) */
+const skills = [
+  { name: "Python", level: 85 },
+  { name: "Lógica de Programação", level: 85 },
+  { name: "Flask / FastAPI", level: 65 },
+  { name: "Git & GitHub", level: 75 },
+  { name: "SQL / Bancos de Dados", level: 65 },
+  { name: "HTML, CSS & JavaScript", level: 70 },
+];
+const skillsList = document.getElementById('skillsList');
+skills.forEach(s => {
+  const div = document.createElement('div');
+  div.innerHTML = `
+    <div class="flex justify-between mb-1 text-sm">
+      <span class="font-medium">${s.name}</span>
+      <span class="text-yellow-400 mono">${s.level}%</span>
+    </div>
+    <div class="w-full h-2 rounded-full bg-white/10 overflow-hidden">
+      <div class="skill-bar h-full bg-gradient-to-r from-blue-500 to-yellow-400" style="width:0%" data-width="${s.level}%"></div>
+    </div>
+  `;
+  skillsList.appendChild(div);
+});
+const barObserver = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if(e.isIntersecting) e.target.style.width = e.target.dataset.width; });
+}, { threshold: 0.3 });
+document.querySelectorAll('.skill-bar').forEach(b => barObserver.observe(b));
+
+/* ======================================================
+   PLAYGROUND PYTHON (Pyodide) — Python real no navegador
+====================================================== */
+const examples = {
+  fib: `# Sequência de Fibonacci
+def fibonacci(n):
+    a, b = 0, 1
+    resultado = []
+    for _ in range(n):
+        resultado.append(a)
+        a, b = b, a + b
+    return resultado
+
+print("Primeiros 10 números de Fibonacci:")
+print(fibonacci(10))`,
+  sort: `# Bubble Sort
+def bubble_sort(lista):
+    n = len(lista)
+    for i in range(n):
+        for j in range(n - i - 1):
+            if lista[j] > lista[j+1]:
+                lista[j], lista[j+1] = lista[j+1], lista[j]
+    return lista
+
+numeros = [5, 2, 9, 1, 5, 6, 3]
+print("Lista original:", numeros)
+print("Lista ordenada:", bubble_sort(numeros.copy()))`,
+  primo: `# Verificador de números primos
+def eh_primo(n):
+    if n < 2:
+        return False
+    for i in range(2, int(n ** 0.5) + 1):
+        if n % i == 0:
+            return False
+    return True
+
+primos = [n for n in range(2, 50) if eh_primo(n)]
+print("Números primos até 50:")
+print(primos)`,
+  palindromo: `# Verificador de palíndromo
+def eh_palindromo(texto):
+    texto = texto.lower().replace(" ", "")
+    return texto == texto[::-1]
+
+palavras = ["arara", "python", "osso", "radar"]
+for p in palavras:
+    print(f"{p} -> {'é palíndromo' if eh_palindromo(p) else 'não é palíndromo'}")`,
+  custom: `# Escreva seu próprio código Python aqui
+print("Olá, recrutador(a)! 🐍")
+`
+};
+
+const pyCodeEl = document.getElementById('pyCode');
+const exampleSelect = document.getElementById('exampleSelect');
+const runBtn = document.getElementById('runBtn');
+const pyOutput = document.getElementById('pyOutput');
+const pyStatus = document.getElementById('pyStatus');
+
+pyCodeEl.value = examples.fib;
+exampleSelect.addEventListener('change', () => {
+  pyCodeEl.value = examples[exampleSelect.value];
+});
+
+let pyodideInstance = null;
+let pyodideReady = false;
+runBtn.disabled = true;
+
+async function initPyodide(){
+  try{
+    pyodideInstance = await loadPyodide();
+    pyodideReady = true;
+    pyStatus.textContent = "✅ Ambiente Python pronto! Clique em Executar.";
+    runBtn.disabled = false;
+  } catch(err){
+    pyStatus.textContent = "⚠️ Não foi possível carregar o Python no navegador (verifique sua conexão).";
+    console.error(err);
+  }
+}
+initPyodide();
+
+runBtn.addEventListener('click', async () => {
+  if(!pyodideReady){ return; }
+  runBtn.disabled = true;
+  const originalLabel = document.getElementById('runLabel').textContent;
+  document.getElementById('runLabel').textContent = "Executando...";
+  pyOutput.textContent = "";
+  try{
+    let capturedOutput = "";
+    pyodideInstance.setStdout({ batched: (s) => { capturedOutput += s + "\n"; } });
+    pyodideInstance.setStderr({ batched: (s) => { capturedOutput += s + "\n"; } });
+    await pyodideInstance.runPythonAsync(pyCodeEl.value);
+    pyOutput.textContent = capturedOutput || "(código executado sem saída — use print() para ver resultados)";
+  } catch(err){
+    pyOutput.textContent = "❌ Erro:\n" + err.message;
+  } finally {
+    runBtn.disabled = false;
+    document.getElementById('runLabel').textContent = originalLabel;
+  }
+});
+
+/* ======================================================
+   API DEMO (Flask/FastAPI real ou simulação)
+====================================================== */
+const apiBtn = document.getElementById('apiBtn');
+const apiResult = document.getElementById('apiResult');
+apiBtn.addEventListener('click', async () => {
+  apiResult.textContent = "Chamando API...";
+  if(!PYTHON_API_URL){
+    setTimeout(() => {
+      apiResult.textContent = JSON.stringify({
+        status: "online (simulado)",
+        linguagem: "Python 3",
+        framework: "Flask",
+        aviso: "Configure PYTHON_API_URL no JavaScript para conectar sua API real hospedada (Render/Railway/PythonAnywhere)."
+      }, null, 2);
+    }, 500);
+    return;
+  }
+  try{
+    const res = await fetch(PYTHON_API_URL);
+    const data = await res.json();
+    apiResult.textContent = JSON.stringify(data, null, 2);
+  } catch(err){
+    apiResult.textContent = "❌ Erro ao conectar com a API: " + err.message;
+  }
+});
+
+/* ======================================================
+   INTEGRAÇÃO COM A API DO GITHUB
+====================================================== */
+const langColors = {
+  Python: "#3572A5", JavaScript: "#f1e05a", TypeScript: "#3178c6", HTML: "#e34c26", CSS: "#563d7c",
+  Java: "#b07219", "C#": "#178600", C: "#555555", "C++": "#f34b7d",
+  PHP: "#4F5D95", Shell: "#89e051", Jupyter: "#DA5B0B", Go: "#00ADD8", Ruby: "#701516"
+};
+
+async function loadGitHubProfile(){
+  try{
+    const res = await fetch(`https://api.github.com/users/${GITHUB_USERNAME}`);
+    if(!res.ok) throw new Error('Usuário não encontrado');
+    const data = await res.json();
+    document.getElementById('statRepos').textContent = data.public_repos ?? '0';
+    document.getElementById('statFollowers').textContent = data.followers ?? '0';
+
+    document.getElementById('statsCard').src = `https://github-readme-stats.vercel.app/api?username=${GITHUB_USERNAME}&show_icons=true&theme=tokyonight&hide_border=true&bg_color=00000000`;
+    document.getElementById('streakCard').src = `https://streak-stats.demolab.com/?user=${GITHUB_USERNAME}&theme=tokyonight&hide_border=true&background=00000000`;
+  } catch(err){
+    console.warn('Erro ao carregar perfil do GitHub:', err.message);
+  }
+}
+
+async function loadGitHubRepos(){
+  const loading = document.getElementById('reposLoading');
+  const errorBox = document.getElementById('reposError');
+  const emptyNote = document.getElementById('reposEmptyNote');
+  const grid = document.getElementById('reposGrid');
+  try{
+    const res = await fetch(`https://api.github.com/users/${GITHUB_USERNAME}/repos?sort=updated&per_page=100`);
+    if(!res.ok) throw new Error('Não foi possível carregar os repositórios');
+    let repos = await res.json();
+    repos = repos.filter(r => !r.fork).sort((a,b) => b.stargazers_count - a.stargazers_count);
+
+    let totalStars = 0;
+    const langCount = {};
+    repos.forEach(r => {
+      totalStars += r.stargazers_count;
+      if(r.language) langCount[r.language] = (langCount[r.language] || 0) + 1;
+    });
+    document.getElementById('statStars').textContent = totalStars;
+
+    const sortedLangs = Object.entries(langCount).sort((a,b) => b[1]-a[1]).slice(0,6);
+    const totalLangCount = sortedLangs.reduce((acc,[,c]) => acc+c, 0) || 1;
+    const langList = document.getElementById('langList');
+    langList.innerHTML = '';
+    if(sortedLangs.length === 0){
+      langList.innerHTML = '<p class="text-slate-500 text-sm">Nenhuma linguagem detectada ainda.</p>';
+    }
+    sortedLangs.forEach(([lang, count]) => {
+      const pct = Math.round((count/totalLangCount)*100);
+      const color = langColors[lang] || '#818cf8';
+      const row = document.createElement('div');
+      row.innerHTML = `
+        <div class="flex justify-between text-sm mb-1">
+          <span><span class="lang-dot mr-2" style="background:${color}"></span>${lang}</span>
+          <span class="text-slate-400 mono">${pct}%</span>
+        </div>
+        <div class="w-full h-2 rounded-full bg-white/10 overflow-hidden">
+          <div class="h-full rounded-full" style="width:${pct}%; background:${color}"></div>
+        </div>
+      `;
+      langList.appendChild(row);
+    });
+
+    const top = repos.slice(0, 6);
+    grid.innerHTML = '';
+    if(top.length === 0){
+      emptyNote.classList.remove('hidden');
+    } else if (top.length < 3){
+      emptyNote.classList.remove('hidden');
+    }
+    top.forEach(repo => {
+      const color = langColors[repo.language] || '#818cf8';
+      const card = document.createElement('a');
+      card.href = repo.html_url;
+      card.target = '_blank';
+      card.className = 'card-hover block p-6 rounded-2xl bg-white/5 border border-white/10';
+      card.innerHTML = `
+        <div class="flex items-start justify-between mb-3">
+          <h3 class="font-semibold text-lg break-all">📁 ${repo.name}</h3>
+          <span class="text-yellow-400 text-sm flex items-center gap-1 shrink-0 ml-2">⭐ ${repo.stargazers_count}</span>
+        </div>
+        <p class="text-slate-400 text-sm mb-4 line-clamp-3">${repo.description ? repo.description : 'Sem descrição fornecida.'}</p>
+        <div class="flex items-center justify-between text-xs text-slate-500">
+          <span class="flex items-center gap-1">${repo.language ? `<span class="lang-dot" style="background:${color}"></span> ${repo.language}` : ''}</span>
+          <span>🍴 ${repo.forks_count}</span>
+        </div>
+      `;
+      grid.appendChild(card);
+    });
+
+    loading.classList.add('hidden');
+  } catch(err){
+    loading.classList.add('hidden');
+    errorBox.textContent = 'Erro ao buscar dados do GitHub: ' + err.message + ' (verifique o nome de usuário configurado ou o limite de requisições da API)';
+    errorBox.classList.remove('hidden');
+  }
+}
+
+loadGitHubProfile();
+loadGitHubRepos();
+
+/* ======================================================
+   AVATAR ROTATIVO: alterna entre foto real, robô e Octocat
+====================================================== */
+const avatarSources = [
+  "https://avatars.githubusercontent.com/nureyevDev",
+  "https://api.dicebear.com/7.x/bottts/svg?seed=pyfolio",
+  "https://octodex.github.com/images/original.png"
+];
+let avatarIndex = 0;
+const avatarImgEl = document.getElementById('avatarImg');
+setInterval(() => {
+  avatarIndex = (avatarIndex + 1) % avatarSources.length;
+  avatarImgEl.style.opacity = '0';
+  setTimeout(() => {
+    avatarImgEl.src = avatarSources[avatarIndex];
+    avatarImgEl.style.opacity = '1';
+  }, 400);
+}, 3000);
+
+/* FORMULÁRIO DE CONTATO */
+const contactForm = document.getElementById('contactForm');
+const formMsg = document.getElementById('formMsg');
+contactForm.addEventListener('submit', function(e){
+  const action = contactForm.getAttribute('action') || '';
+  if(action.includes('SEU_ID_FORMSPREE')){
+    e.preventDefault();
+    formMsg.textContent = '⚠️ Configure seu endpoint do Formspree (ou outro serviço) no atributo "action" do formulário para receber mensagens de verdade.';
+    formMsg.className = 'text-sm text-yellow-400';
+    formMsg.classList.remove('hidden');
+  } else {
+    formMsg.textContent = 'Mensagem enviada com sucesso! ✅';
+    formMsg.className = 'text-sm text-emerald-400';
+    formMsg.classList.remove('hidden');
+  }
+});
+</script>
+</body>
+</html>

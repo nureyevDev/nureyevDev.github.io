@@ -22,8 +22,8 @@ const contactMethods = [
   {
     icon: <Mail size={24} />,
     label: 'Email',
-    value: 'nureyevalencar@email.com',
-    href: 'mailto:nureyevalencar@email.com',
+    value: 'nureyev.dev@gmail.com',
+    href: 'mailto:nureyev.dev@gmail.com',
     color: 'from-blue-500/20 to-cyan-500/20',
     borderColor: 'hover:border-blue-500/40',
   },
@@ -38,8 +38,8 @@ const contactMethods = [
   {
     icon: <LinkedinIcon size={24} />,
     label: 'LinkedIn',
-    value: '/in/nureyevDev',
-    href: 'https://linkedin.com/in/nureyevDev',
+    value: '/in/nureyev-alencar-108495418',
+    href: 'https://www.linkedin.com/in/nureyev-alencar-108495418',
     color: 'from-blue-600/20 to-blue-400/20',
     borderColor: 'hover:border-blue-400/40',
   },
@@ -110,7 +110,7 @@ export default function Contact() {
               vamos conversar!
             </p>
             <a
-              href="mailto:nureyevalencar@email.com"
+              href="mailto:nureyev.dev@gmail.com"
               className="inline-flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-bold rounded-xl hover:shadow-xl hover:shadow-blue-500/25 transition-all text-lg"
             >
               <Send size={20} />

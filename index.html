@@ -5,6 +5,23 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Nureyev Alencar | Desenvolvedor(a) Python</title>
 <meta name="description" content="Portfólio de desenvolvedor(a) Python com playground interativo rodando no navegador e integração com API do GitHub">
+<link rel="canonical" href="https://nureyevdev.github.io/">
+
+<!-- Open Graph: como o link aparece ao compartilhar no LinkedIn, WhatsApp etc. -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://nureyevdev.github.io/">
+<meta property="og:title" content="Nureyev Alencar | Desenvolvedor(a) Python">
+<meta property="og:description" content="Portfólio de desenvolvedor(a) Python com playground interativo rodando no navegador e integração com API do GitHub.">
+<meta property="og:image" content="https://avatars.githubusercontent.com/nureyevDev">
+
+<!-- Twitter/X card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Nureyev Alencar | Desenvolvedor(a) Python">
+<meta name="twitter:description" content="Portfólio de desenvolvedor(a) Python com playground interativo rodando no navegador e integração com API do GitHub.">
+<meta name="twitter:image" content="https://avatars.githubusercontent.com/nureyevDev">
+
+<!-- Favicon (usa a própria foto do GitHub) -->
+<link rel="icon" href="https://avatars.githubusercontent.com/nureyevDev">
 <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
@@ -67,6 +84,8 @@
     </a>
     <div class="hidden md:flex items-center gap-8 text-sm font-medium">
       <a href="#sobre" class="hover:text-yellow-400 transition">Sobre</a>
+      <a href="#formacao" class="hover:text-yellow-400 transition">Formação</a>
+      <a href="#certificacoes" class="hover:text-yellow-400 transition">Certificados</a>
       <a href="#playground" class="hover:text-yellow-400 transition">Playground Python</a>
       <a href="#skills" class="hover:text-yellow-400 transition">Skills</a>
       <a href="#projetos" class="hover:text-yellow-400 transition">Projetos</a>
@@ -84,6 +103,8 @@
   </nav>
   <div id="mobileMenu" class="hidden md:hidden flex-col gap-1 px-5 pb-4 text-sm font-medium bg-slate-950/95 border-b border-white/5">
     <a href="#sobre" class="block py-2">Sobre</a>
+    <a href="#formacao" class="block py-2">Formação</a>
+    <a href="#certificacoes" class="block py-2">Certificados</a>
     <a href="#playground" class="block py-2">Playground Python</a>
     <a href="#skills" class="block py-2">Skills</a>
     <a href="#projetos" class="block py-2">Projetos</a>
@@ -138,15 +159,16 @@
       <h2 class="text-3xl font-bold mb-2">Sobre <span class="gradient-text">mim</span></h2>
       <div class="w-16 h-1 bg-blue-500 rounded mb-6"></div>
       <p class="text-slate-400 mb-4 leading-relaxed">
-        Sou estudante do curso de Desenvolvimento de Sistemas e atualmente estou aprofundando meus
-        estudos em <strong class="text-slate-200">Python</strong>: lógica de programação, estruturas de
-        dados, orientação a objetos e desenvolvimento de APIs com Flask/FastAPI.
+        Sou estudante de <strong class="text-slate-200">Desenvolvimento de Sistemas</strong> pelo Senac,
+        com certificações na área de TI, focado em iniciar minha carreira em tecnologia como desenvolvedor.
+        Tenho conhecimento em <strong class="text-slate-200">Python</strong>, <strong class="text-slate-200">JavaScript</strong>,
+        HTML5, CSS, SQL, lógica de programação e análise de dados.
       </p>
       <p class="text-slate-400 mb-6 leading-relaxed">
-        Como o GitHub Pages só hospeda sites estáticos, usei <strong class="text-slate-200">Pyodide</strong>
-        (Python rodando via WebAssembly) para trazer Python de verdade para dentro deste site — sem precisar
-        de servidor. Também deixei uma seção pronta para consumir uma API própria feita em Python assim que
-        eu finalizar o deploy dela.
+        Atualmente estou me dedicando a desenvolver projetos práticos para fortalecer minhas habilidades e
+        ganhar experiência real — como o Playground Python deste próprio site, que roda
+        <strong class="text-slate-200"> Pyodide</strong> (Python real via WebAssembly) direto no navegador.
+        Meu objetivo é conquistar minha primeira oportunidade em TI, aprender na prática e evoluir rapidamente.
       </p>
       <div class="grid grid-cols-3 gap-4 text-center">
         <div class="p-4 rounded-xl bg-white/5 border border-white/10">
@@ -178,10 +200,63 @@
         self.buscando_vaga = <span class="text-purple-400">True</span></pre>
       </div>
     </div>
+  </div></section>
+
+<!-- FORMAÇÃO & EXPERIÊNCIA -->
+<section id="formacao" class="py-24 border-t border-white/5 bg-white/[0.02]">
+  <div class="max-w-4xl mx-auto px-5">
+    <div class="text-center mb-14 fade-in">
+      <h2 class="text-3xl font-bold mb-2">Formação & <span class="gradient-text">Experiência</span></h2>
+      <div class="w-16 h-1 bg-blue-500 rounded mx-auto"></div>
+    </div>
+
+    <div class="grid md:grid-cols-2 gap-10">
+      <!-- Formação -->
+      <div class="fade-in">
+        <h3 class="text-lg font-semibold mb-6 flex items-center gap-2">🎓 Formação acadêmica</h3>
+        <div class="relative pl-6 border-l-2 border-blue-500/30">
+          <div class="absolute -left-[9px] top-1 w-4 h-4 rounded-full bg-blue-500"></div>
+          <p class="font-semibold text-slate-200">Senac Brasil</p>
+          <p class="text-sm text-yellow-400 mb-1">Desenvolvimento de Sistemas</p>
+          <p class="text-xs text-slate-500 mb-2">2026 – o momento</p>
+          <p class="text-sm text-slate-400 leading-relaxed">
+            Curso focado em desenvolvimento de sistemas, lógica de programação, análise de dados e boas práticas
+            com Git.
+          </p>
+        </div>
+      </div>
+
+      <!-- Experiência -->
+      <div class="fade-in">
+        <h3 class="text-lg font-semibold mb-6 flex items-center gap-2">💼 Experiência</h3>
+        <div class="relative pl-6 border-l-2 border-blue-500/30">
+          <div class="absolute -left-[9px] top-1 w-4 h-4 rounded-full bg-blue-500"></div>
+          <p class="font-semibold text-slate-200">Desenvolvedor Full Stack</p>
+          <p class="text-sm text-yellow-400 mb-1">Projetos Pessoais · Autônomo</p>
+          <p class="text-xs text-slate-500 mb-2">jan de 2026 – o momento · Teresina, Piauí, Brasil</p>
+          <ul class="text-sm text-slate-400 leading-relaxed list-disc list-inside space-y-1">
+            <li>Desenvolvimento de projetos utilizando JavaScript e Python</li>
+            <li>Aplicação de lógica de programação na resolução de problemas</li>
+            <li>Criação de soluções práticas para aprendizado contínuo</li>
+          </ul>
+        </div>
+      </div>
+    </div>
   </div>
 </section>
 
-<!-- PLAYGROUND PYTHON (Pyodide) -->
+<!-- CERTIFICAÇÕES -->
+<section id="certificacoes" class="py-24 border-t border-white/5">
+  <div class="max-w-6xl mx-auto px-5">
+    <div class="text-center mb-14 fade-in">
+      <span class="badge inline-block px-3 py-1 rounded-full bg-blue-500/15 text-blue-300 border border-blue-500/30 uppercase mb-4">9 certificados</span>
+      <h2 class="text-3xl font-bold mb-2">Licenças & <span class="gradient-text">Certificados</span></h2>
+      <div class="w-16 h-1 bg-blue-500 rounded mx-auto"></div>
+    </div>
+    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 fade-in" id="certList"></div>
+  </div>
+</section>
+
 <section id="playground" class="py-24 border-t border-white/5 bg-white/[0.02]">
   <div class="max-w-6xl mx-auto px-5">
     <div class="text-center mb-10 fade-in">
@@ -413,11 +488,38 @@ document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
 const skills = [
   { name: "Python", level: 85 },
   { name: "Lógica de Programação", level: 85 },
-  { name: "Flask / FastAPI", level: 65 },
-  { name: "Git & GitHub", level: 75 },
+  { name: "JavaScript", level: 70 },
+  { name: "HTML5 & CSS", level: 75 },
   { name: "SQL / Bancos de Dados", level: 65 },
-  { name: "HTML, CSS & JavaScript", level: 70 },
+  { name: "Git & GitHub", level: 75 },
+  { name: "Análise de Dados", level: 60 },
+  { name: "Microsoft Excel", level: 65 },
 ];
+/* CERTIFICAÇÕES */
+const certs = [
+  { titulo: "AWS Educate Introduction to Cloud 101", instituicao: "Amazon Web Services (AWS)", data: "Ago 2026", icon: "☁️" },
+  { titulo: "Nivelamento do Programa Hackers do Bem — Formação em Cibersegurança", instituicao: "SENAI", data: "Jul 2026", icon: "🛡️" },
+  { titulo: "Introdução à Lógica de Programação — Do Zero ao Código", instituicao: "Instituto Federal do Paraná (IFPR)", data: "Jul 2026", icon: "💻" },
+  { titulo: "Desenvolvimento de Sistemas Web: CSS e HTML", instituicao: "Fundação Getulio Vargas (FGV)", data: "Jul 2026", icon: "🌐" },
+  { titulo: "Lógica de Programação: Deixando Seus Programas Espertos", instituicao: "IFRS", data: "Jun 2026", icon: "🧠" },
+  { titulo: "Lógica de Programação: Começando a Desenvolver Seus Primeiros Programas", instituicao: "IFRS", data: "Mai 2026", icon: "🧩" },
+  { titulo: "Lógica de Programação e Interatividade com Scratch", instituicao: "Samsung Ocean", data: "Mai 2026", icon: "🎮" },
+  { titulo: "Prompting Responsável: Maximizar a IA no Seu Negócio", instituicao: "Microsoft", data: "Mai 2026", icon: "🤖" },
+  { titulo: "Introdução à Ciência de Dados", instituicao: "Santander Open Academy", data: "Mai 2026", icon: "📊" },
+];
+const certList = document.getElementById('certList');
+certs.forEach(c => {
+  const div = document.createElement('div');
+  div.className = "p-5 rounded-xl bg-white/5 border border-white/10 hover:border-blue-500/40 transition";
+  div.innerHTML = `
+    <div class="text-2xl mb-3">${c.icon}</div>
+    <p class="font-semibold text-slate-200 text-sm leading-snug mb-1">${c.titulo}</p>
+    <p class="text-xs text-yellow-400 mb-1">${c.instituicao}</p>
+    <p class="text-xs text-slate-500">${c.data}</p>
+  `;
+  certList.appendChild(div);
+});
+
 const skillsList = document.getElementById('skillsList');
 skills.forEach(s => {
   const div = document.createElement('div');

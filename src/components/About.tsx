@@ -1,158 +1,201 @@
-import { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
-import { useInView } from 'react-intersection-observer';
-import { Code2, BookOpen, Rocket } from 'lucide-react';
-import SectionHeading from './SectionHeading';
+import { useState } from 'react';
+import { motion } from 'motion/react';
+import { Code2, BookOpen, Rocket, CheckCircle2, Copy, Check, Terminal, Database, Cpu } from 'lucide-react';
+import SectionHeader from './SectionHeader';
+import { PERSONAL_INFO } from '../data/portfolioData';
 
-interface GitHubData {
-  public_repos: number;
-  followers: number;
+const ABOUT_TABS = [
+  {
+    id: 'bio',
+    label: 'perfil.py',
+    code: `# Perfil Técnico de Nureyev Alencar
+class Desenvolvedor:
+    def __init__(self):
+        self.nome = "Nureyev Alencar"
+        self.localizacao = "Teresina, PI — Brasil"
+        self.formacao = "Desenvolvimento de Sistemas (Senac)"
+        self.foco_principal = "Python Backend & APIs REST"
+        self.stack = ["Python", "Flask", "FastAPI", "SQL", "Git", "JS"]
+        self.disponibilidade = "Estágio / Júnior Presencial ou Remoto"
+
+    def objetivo(self) -> str:
+        return "Aplicar lógica sólida, boas práticas e evoluir na área de TI."
+`,
+  },
+  {
+    id: 'skills',
+    label: 'competencias.py',
+    code: `# Competências e Ferramentas Práticas
+stack_backend = {
+    "linguagem": "Python 3 (POO, Decorators, Generics)",
+    "frameworks": ["Flask", "FastAPI"],
+    "bancos": ["PostgreSQL", "SQLite", "Modelagem ER"],
+    "versionamento": "Git, GitHub Flow & PRs",
+    "diferencial": "Execução de Python no browser via WebAssembly (Pyodide)"
 }
 
-function AnimatedCounter({ target, label }: { target: number; label: string }) {
-  const [count, setCount] = useState(0);
-  const { ref, inView } = useInView({ triggerOnce: true });
+print(f"Stack ativa: {list(stack_backend.keys())}")
+`,
+  },
+  {
+    id: 'goals',
+    label: 'metas.py',
+    code: `# Metas de Curto & Médio Prazo
+metas_2026 = [
+    "✅ Concluir Curso Técnico de Dev Sistemas (Senac)",
+    "✅ Conquistar primeira oportunidade como Dev Júnior/Estagiário",
+    "🚀 Construir APIs robustas e microsserviços com FastAPI",
+    "🚀 Aprofundar em Docker, testes automatizados e deploy em nuvem"
+]
 
-  useEffect(() => {
-    if (!inView) return;
-    let start = 0;
-    const end = target;
-    const duration = 2000;
-    const increment = end / (duration / 16);
-    const timer = setInterval(() => {
-      start += increment;
-      if (start >= end) {
-        setCount(end);
-        clearInterval(timer);
-      } else {
-        setCount(Math.floor(start));
-      }
-    }, 16);
-    return () => clearInterval(timer);
-  }, [inView, target]);
-
-  return (
-    <div ref={ref} className="text-center">
-      <div className="text-3xl font-extrabold gradient-text">{count}+</div>
-      <div className="text-sm text-slate-400 mt-1">{label}</div>
-    </div>
-  );
-}
+for meta in metas_2026:
+    print(meta)
+`,
+  },
+];
 
 export default function About() {
-  const { ref, inView } = useInView({ triggerOnce: true, threshold: 0.1 });
-  const [ghData, setGhData] = useState<GitHubData | null>(null);
+  const [activeTab, setActiveTab] = useState(0);
+  const [copied, setCopied] = useState(false);
 
-  useEffect(() => {
-    fetch('https://api.github.com/users/nureyevDev')
-      .then(r => r.json())
-      .then(data => setGhData(data))
-      .catch(() => {});
-  }, []);
+  const handleCopy = () => {
+    navigator.clipboard.writeText(ABOUT_TABS[activeTab].code);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   const highlights = [
-    { icon: <Code2 size={24} />, title: 'Python First', desc: 'Foco principal em Python, Flask, FastAPI e SQL' },
-    { icon: <BookOpen size={24} />, title: 'Aprendizado Contínuo', desc: '9 certificações na área de TI conquistadas' },
-    { icon: <Rocket size={24} />, title: 'Projetos Práticos', desc: 'Portfólio com projetos reais e código ao vivo' },
+    {
+      icon: <Terminal className="text-sky-400" size={20} />,
+      title: 'Especialização em Python',
+      desc: 'Foco no ecossistema Python moderno: scripts, lógica avançada e APIs.',
+    },
+    {
+      icon: <Database className="text-emerald-400" size={20} />,
+      title: 'Bancos de Dados & SQL',
+      desc: 'Consultas estruturadas, integridade relacional e integração com ORMs.',
+    },
+    {
+      icon: <BookOpen className="text-indigo-400" size={20} />,
+      title: 'Formação Senac & 9 Certificações',
+      desc: 'Base teórica sólida complementada por cursos especializados em tecnologia.',
+    },
+    {
+      icon: <Rocket className="text-amber-400" size={20} />,
+      title: 'Orientado a Resultados & Prática',
+      desc: 'Construção contínua de projetos reais, repositórios abertos e código limpo.',
+    },
   ];
 
   return (
-    <section id="sobre" className="relative py-24 overflow-hidden">
-      <div className="absolute inset-0 dot-bg" />
+    <section id="sobre" className="py-20 relative bg-slate-950 border-t border-slate-900">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <SectionHeader
+          badge="Apresentação"
+          title="Sobre"
+          highlight="Minha Trajetória"
+          subtitle="Conheça minha dedicação aos estudos, foco técnico e como posso somar à sua equipe."
+        />
 
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <SectionHeading title="Sobre" highlight="mim" />
-
-        <div ref={ref} className="grid lg:grid-cols-2 gap-12 items-center">
-          {/* Code Card */}
-          <motion.div
-            initial={{ opacity: 0, x: -40 }}
-            animate={inView ? { opacity: 1, x: 0 } : {}}
-            transition={{ duration: 0.7 }}
-            className="relative"
-          >
-            <div className="glass-card rounded-2xl overflow-hidden">
-              {/* Code editor header */}
-              <div className="flex items-center gap-2 px-4 py-3 bg-slate-900/80 border-b border-slate-700/50">
-                <div className="flex gap-1.5">
-                  <div className="w-3 h-3 rounded-full bg-red-500/80" />
-                  <div className="w-3 h-3 rounded-full bg-yellow-500/80" />
-                  <div className="w-3 h-3 rounded-full bg-green-500/80" />
+        <div className="grid lg:grid-cols-12 gap-10 items-start">
+          {/* Left Column: Code Preview Card (6 cols) */}
+          <div className="lg:col-span-6">
+            <div className="surface-card-static rounded-2xl overflow-hidden border border-slate-800 shadow-xl">
+              {/* Tab Header */}
+              <div className="flex items-center justify-between px-4 py-2.5 bg-slate-900 border-b border-slate-800">
+                <div className="flex items-center gap-1.5 overflow-x-auto py-1">
+                  {ABOUT_TABS.map((tab, idx) => (
+                    <button
+                      key={tab.id}
+                      type="button"
+                      onClick={() => setActiveTab(idx)}
+                      className={`px-3 py-1 text-xs font-mono rounded-md transition-colors whitespace-nowrap ${
+                        activeTab === idx
+                          ? 'bg-slate-800 text-sky-400 font-semibold border border-slate-700'
+                          : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40'
+                      }`}
+                    >
+                      {tab.label}
+                    </button>
+                  ))}
                 </div>
-                <span className="text-xs text-slate-500 font-mono ml-2">desenvolvedor.py</span>
-              </div>
-              <pre className="p-6 font-mono text-sm leading-relaxed overflow-x-auto">
-                <code>
-                  <span className="text-purple-400">class</span>{' '}
-                  <span className="text-yellow-300">Desenvolvedor</span>
-                  <span className="text-slate-400">:</span>{'\n'}
-                  {'  '}<span className="text-purple-400">def</span>{' '}
-                  <span className="text-blue-300">__init__</span>
-                  <span className="text-slate-400">(</span>
-                  <span className="text-red-400">self</span>
-                  <span className="text-slate-400">):</span>{'\n'}
-                  {'    '}self.nome = <span className="text-green-400">"Nureyev Alencar"</span>{'\n'}
-                  {'    '}self.foco = <span className="text-green-400">"Python"</span>{'\n'}
-                  {'    '}self.stack = [<span className="text-green-400">"Python"</span>, <span className="text-green-400">"Flask"</span>, <span className="text-green-400">"FastAPI"</span>, <span className="text-green-400">"SQL"</span>]{'\n'}
-                  {'    '}self.buscando_vaga = <span className="text-orange-400">True</span>{'\n'}
-                  {'\n'}
-                  {'  '}<span className="text-purple-400">def</span>{' '}
-                  <span className="text-blue-300">objetivo</span>
-                  <span className="text-slate-400">(</span>
-                  <span className="text-red-400">self</span>
-                  <span className="text-slate-400">):</span>{'\n'}
-                  {'    '}<span className="text-purple-400">return</span>{' '}
-                  <span className="text-green-400">"Primeira oportunidade em TI"</span>
-                </code>
-              </pre>
-            </div>
-          </motion.div>
 
-          {/* Text Content */}
-          <motion.div
-            initial={{ opacity: 0, x: 40 }}
-            animate={inView ? { opacity: 1, x: 0 } : {}}
-            transition={{ duration: 0.7, delay: 0.2 }}
-          >
-            <p className="text-slate-300 text-lg leading-relaxed mb-4">
-              Sou estudante de <strong className="text-white">Desenvolvimento de Sistemas</strong> pelo Senac,
-              com certificações na área de TI, focado em iniciar minha carreira em tecnologia como desenvolvedor.
-            </p>
-            <p className="text-slate-400 leading-relaxed mb-8">
-              Tenho conhecimento em <strong className="text-blue-400">Python</strong>,{' '}
-              <strong className="text-yellow-400">JavaScript</strong>, HTML5, CSS, SQL, lógica de programação e
-              análise de dados. Meu objetivo é conquistar minha primeira oportunidade em TI, aprender na prática e
-              evoluir rapidamente.
-            </p>
-
-            {/* Highlight cards */}
-            <div className="space-y-3 mb-8">
-              {highlights.map((h, i) => (
-                <motion.div
-                  key={h.title}
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={inView ? { opacity: 1, x: 0 } : {}}
-                  transition={{ delay: 0.4 + i * 0.1 }}
-                  className="flex items-center gap-4 p-3 rounded-xl bg-slate-800/30 border border-slate-700/30 hover:border-blue-500/30 transition-all"
+                <button
+                  type="button"
+                  onClick={handleCopy}
+                  className="p-1.5 text-slate-400 hover:text-white rounded-md hover:bg-slate-800 transition-colors ml-2"
+                  title="Copiar código"
+                  aria-label="Copiar código"
                 >
-                  <div className="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-400 flex-shrink-0">
-                    {h.icon}
+                  {copied ? <Check size={15} className="text-emerald-400" /> : <Copy size={15} />}
+                </button>
+              </div>
+
+              {/* Code Editor Body */}
+              <div className="p-5 bg-slate-950/95 overflow-x-auto text-xs font-mono text-slate-300 leading-relaxed min-h-[290px]">
+                <pre>
+                  <code>{ABOUT_TABS[activeTab].code}</code>
+                </pre>
+              </div>
+
+              {/* Footer Indicator */}
+              <div className="px-4 py-2 bg-slate-900/80 border-t border-slate-800 text-[11px] font-mono text-slate-400 flex items-center justify-between">
+                <span>UTF-8 • Python 3.12</span>
+                <span className="text-emerald-400 flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                  Pronto para execução
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Column: Narrative & Highlights (6 cols) */}
+          <div className="lg:col-span-6 flex flex-col gap-6">
+            <div className="space-y-4 text-slate-300 text-sm sm:text-base leading-relaxed">
+              <p>
+                Sou estudante do curso técnico em <strong className="text-white font-semibold">Desenvolvimento de Sistemas pelo Senac</strong> em Teresina, Piauí. Tenho direcionado meus estudos com rigor para o universo <strong className="text-sky-400 font-semibold">Python</strong>, focando em arquitetura limpa, lógica estruturada e construção de serviços web.
+              </p>
+              <p>
+                Além das aulas, realizei <strong className="text-slate-100 font-semibold">9 certificações complementares</strong> em plataformas renomadas como Curso em Vídeo e DIO, cobrindo desde lógica algorítmica até modelagem de banco de dados relacional (SQL) e boas práticas com Git.
+              </p>
+            </div>
+
+            {/* Structured Highlights Grid */}
+            <div className="grid sm:grid-cols-2 gap-3.5 pt-2">
+              {highlights.map((h, i) => (
+                <div
+                  key={i}
+                  className="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800/80 hover:border-slate-700 transition-colors"
+                >
+                  <div className="flex items-center gap-2.5 mb-1.5">
+                    <div className="p-1.5 rounded-lg bg-slate-800 border border-slate-700/60">
+                      {h.icon}
+                    </div>
+                    <h4 className="text-xs font-bold text-white tracking-tight">{h.title}</h4>
                   </div>
-                  <div>
-                    <div className="text-white font-semibold text-sm">{h.title}</div>
-                    <div className="text-slate-400 text-xs">{h.desc}</div>
-                  </div>
-                </motion.div>
+                  <p className="text-xs text-slate-400 leading-relaxed">{h.desc}</p>
+                </div>
               ))}
             </div>
 
-            {/* GitHub Stats */}
-            <div className="grid grid-cols-3 gap-4 p-4 rounded-xl bg-slate-800/20 border border-slate-700/30">
-              <AnimatedCounter target={ghData?.public_repos ?? 4} label="Repositórios" />
-              <AnimatedCounter target={ghData?.followers ?? 0} label="Seguidores" />
-              <AnimatedCounter target={9} label="Certificados" />
+            {/* Quick Metrics Bar */}
+            <div className="p-4 rounded-xl bg-gradient-to-r from-sky-950/40 via-slate-900/50 to-indigo-950/40 border border-sky-900/30 flex items-center justify-around text-center">
+              <div>
+                <div className="text-xl font-bold text-sky-400 font-mono">9+</div>
+                <div className="text-[11px] text-slate-400 uppercase tracking-wider">Cursos & Certs</div>
+              </div>
+              <div className="w-px h-8 bg-slate-800" />
+              <div>
+                <div className="text-xl font-bold text-emerald-400 font-mono">100%</div>
+                <div className="text-[11px] text-slate-400 uppercase tracking-wider">Foco Prático</div>
+              </div>
+              <div className="w-px h-8 bg-slate-800" />
+              <div>
+                <div className="text-xl font-bold text-indigo-400 font-mono">Senac</div>
+                <div className="text-[11px] text-slate-400 uppercase tracking-wider">Formação Oficial</div>
+              </div>
             </div>
-          </motion.div>
+          </div>
         </div>
       </div>
     </section>

@@ -1,116 +1,98 @@
-import { motion } from 'framer-motion';
-import { useInView } from 'react-intersection-observer';
-import { GraduationCap, Briefcase, Calendar, MapPin } from 'lucide-react';
-import SectionHeading from './SectionHeading';
-
-const timeline = [
-  {
-    type: 'education' as const,
-    icon: <GraduationCap size={24} />,
-    title: 'Formação Acadêmica',
-    org: 'Senac Brasil',
-    role: 'Desenvolvimento de Sistemas',
-    period: 'Desde 2026',
-    location: undefined,
-    description: 'Curso focado em desenvolvimento de sistemas, lógica de programação, análise de dados e boas práticas com Git.',
-    items: [],
-  },
-  {
-    type: 'work' as const,
-    icon: <Briefcase size={24} />,
-    title: 'Experiência',
-    org: 'Projetos Pessoais · Autônomo',
-    role: 'Desenvolvedor Full Stack',
-    period: 'Desde jan de 2026',
-    location: 'Teresina, Piauí, Brasil',
-    description: undefined,
-    items: [
-      'Desenvolvimento de projetos utilizando JavaScript e Python',
-      'Aplicação de lógica de programação na resolução de problemas',
-      'Criação de soluções práticas para aprendizado contínuo',
-    ],
-  },
-];
+import { GraduationCap, Briefcase, Calendar, MapPin, CheckCircle2, Award } from 'lucide-react';
+import SectionHeader from './SectionHeader';
+import { TIMELINE_DATA } from '../data/portfolioData';
 
 export default function Formation() {
-  const { ref, inView } = useInView({ triggerOnce: true, threshold: 0.1 });
-
   return (
-    <section id="formacao" className="relative py-24 overflow-hidden">
-      <div className="absolute inset-0 grid-bg" />
-      <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-        <SectionHeading title="Formação &" highlight="Experiência" />
+    <section id="formacao" className="py-20 bg-slate-950 relative border-t border-slate-900">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <SectionHeader
+          badge="Jornada Profissional"
+          title="Formação Acadêmica &"
+          highlight="Experiência Prática"
+          subtitle="Minha trajetória de estudos no Senac e dedicação contínua em projetos e código real."
+        />
 
-        <div ref={ref} className="relative">
-          {/* Center line */}
-          <div className="absolute left-1/2 -translate-x-px top-0 bottom-0 w-0.5 bg-gradient-to-b from-blue-500/50 via-cyan-500/50 to-purple-500/50 hidden md:block" />
+        <div className="space-y-6">
+          {TIMELINE_DATA.map((item, index) => {
+            const isEducation = item.type === 'education';
+            const isExperience = item.type === 'experience';
 
-          <div className="space-y-12">
-            {timeline.map((item, i) => (
-              <motion.div
-                key={item.title}
-                initial={{ opacity: 0, y: 40 }}
-                animate={inView ? { opacity: 1, y: 0 } : {}}
-                transition={{ duration: 0.6, delay: i * 0.2 }}
-                className={`relative flex flex-col md:flex-row items-center gap-8 ${
-                  i % 2 === 1 ? 'md:flex-row-reverse' : ''
-                }`}
+            return (
+              <div
+                key={item.id}
+                className="surface-card rounded-2xl p-6 sm:p-7 border border-slate-800 relative transition-all"
               >
-                {/* Dot on timeline */}
-                <div className="absolute left-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-blue-500 border-4 border-gray-950 z-10 hidden md:block" />
-
-                {/* Card */}
-                <div className="md:w-[calc(50%-2rem)] w-full">
-                  <div className="glass-card rounded-2xl p-6 hover:border-blue-500/40">
-                    <div className="flex items-center gap-3 mb-4">
-                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-                        item.type === 'education'
-                          ? 'bg-cyan-500/10 text-cyan-400'
-                          : 'bg-purple-500/10 text-purple-400'
-                      }`}>
-                        {item.icon}
-                      </div>
-                      <div>
-                        <h3 className="text-lg font-bold text-white">{item.title}</h3>
-                        <p className="text-sm text-blue-400 font-semibold">{item.role}</p>
-                      </div>
-                    </div>
-
-                    <p className="text-sm text-slate-300 font-medium mb-1">{item.org}</p>
-
-                    <div className="flex flex-wrap gap-3 text-xs text-slate-400 mb-4">
-                      <span className="flex items-center gap-1">
-                        <Calendar size={12} /> {item.period}
-                      </span>
-                      {item.location && (
-                        <span className="flex items-center gap-1">
-                          <MapPin size={12} /> {item.location}
-                        </span>
+                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-3">
+                  <div className="flex items-start gap-3.5">
+                    <div
+                      className={`w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 border ${
+                        isEducation
+                          ? 'bg-sky-500/10 text-sky-400 border-sky-500/20'
+                          : isExperience
+                          ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                          : 'bg-purple-500/10 text-purple-400 border-purple-500/20'
+                      }`}
+                    >
+                      {isEducation ? (
+                        <GraduationCap size={22} />
+                      ) : isExperience ? (
+                        <Briefcase size={22} />
+                      ) : (
+                        <Award size={22} />
                       )}
                     </div>
 
-                    {item.description && (
-                      <p className="text-sm text-slate-400 leading-relaxed">{item.description}</p>
-                    )}
+                    <div>
+                      <h3 className="text-base sm:text-lg font-bold text-white tracking-tight">
+                        {item.title}
+                      </h3>
+                      <p className="text-xs sm:text-sm text-sky-400 font-medium">
+                        {item.institution}
+                      </p>
+                    </div>
+                  </div>
 
-                    {item.items.length > 0 && (
-                      <ul className="space-y-2 mt-2">
-                        {item.items.map((li, j) => (
-                          <li key={j} className="text-sm text-slate-400 flex items-start gap-2">
-                            <span className="text-blue-400 mt-1.5 w-1.5 h-1.5 rounded-full bg-blue-400 flex-shrink-0" />
-                            {li}
-                          </li>
-                        ))}
-                      </ul>
+                  {/* Status & Period Badge */}
+                  <div className="flex flex-wrap items-center gap-2 sm:self-start">
+                    {item.status && (
+                      <span
+                        className={`px-2.5 py-0.5 rounded-full text-[11px] font-mono border ${
+                          item.status === 'Em andamento'
+                            ? 'bg-amber-500/10 text-amber-400 border-amber-500/20'
+                            : item.status === 'Atual'
+                            ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                            : 'bg-slate-800 text-slate-300 border-slate-700'
+                        }`}
+                      >
+                        {item.status}
+                      </span>
                     )}
+                    <span className="inline-flex items-center gap-1 text-xs text-slate-400 font-mono">
+                      <Calendar size={12} className="text-slate-500" />
+                      <span>{item.period}</span>
+                    </span>
                   </div>
                 </div>
 
-                {/* Spacer for the other side */}
-                <div className="md:w-[calc(50%-2rem)] hidden md:block" />
-              </motion.div>
-            ))}
-          </div>
+                <p className="text-xs sm:text-sm text-slate-300 leading-relaxed mb-4 pl-0 sm:pl-14">
+                  {item.description}
+                </p>
+
+                {/* Skills tags */}
+                <div className="flex flex-wrap gap-1.5 pl-0 sm:pl-14">
+                  {item.skills.map((skill) => (
+                    <span
+                      key={skill}
+                      className="px-2.5 py-0.5 rounded-md bg-slate-900/90 text-slate-300 border border-slate-800 text-[11px] font-mono"
+                    >
+                      {skill}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
     </section>

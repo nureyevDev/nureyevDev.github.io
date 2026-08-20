@@ -1,0 +1,6 @@
+{
+  "name": "Nureyev Alencar - Portfólio Dev Python",
+  "description": "Portfólio moderno, clean e interativo de Nureyev Alencar — Desenvolvedor Python e estudante de Desenvolvimento de Sistemas com playground Pyodide integrado.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

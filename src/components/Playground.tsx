@@ -1,64 +1,7 @@
 import { useState, useRef, useCallback } from 'react';
-import { motion } from 'framer-motion';
-import { Play, RotateCcw, Copy, Check, Loader2 } from 'lucide-react';
-import SectionHeading from './SectionHeading';
-
-const EXAMPLES = [
-  {
-    label: '🐍 Hello World',
-    code: `# Olá, Mundo em Python!
-print("Olá, eu sou Nureyev!")
-print("Bem-vindo ao meu portfólio 🚀")
-
-for i in range(1, 4):
-    print(f"  Habilidade #{i}: Python é incrível!")`,
-  },
-  {
-    label: '📊 Fibonacci',
-    code: `# Sequência de Fibonacci
-def fibonacci(n):
-    fib = [0, 1]
-    for i in range(2, n):
-        fib.append(fib[i-1] + fib[i-2])
-    return fib
-
-seq = fibonacci(15)
-print("Fibonacci (15 termos):")
-print(seq)
-print(f"\\nSoma total: {sum(seq)}")`,
-  },
-  {
-    label: '🎯 List Comprehension',
-    code: `# Poder do Python: List Comprehensions
-numeros = list(range(1, 21))
-
-pares = [n for n in numeros if n % 2 == 0]
-quadrados = [n**2 for n in range(1, 11)]
-fizzBuzz = ["FizzBuzz" if n%15==0 else "Fizz" if n%3==0 else "Buzz" if n%5==0 else n for n in range(1, 16)]
-
-print(f"Pares: {pares}")
-print(f"Quadrados: {quadrados}")
-print(f"FizzBuzz: {fizzBuzz}")`,
-  },
-  {
-    label: '🏗️ Classes',
-    code: `# POO em Python
-class Desenvolvedor:
-    def __init__(self, nome, stack):
-        self.nome = nome
-        self.stack = stack
-        self.disponivel = True
-
-    def apresentar(self):
-        techs = ", ".join(self.stack)
-        status = "✅ Disponível" if self.disponivel else "❌ Ocupado"
-        return f"{self.nome} | Stack: {techs} | {status}"
-
-dev = Desenvolvedor("Nureyev", ["Python", "Flask", "FastAPI", "SQL"])
-print(dev.apresentar())
-print(f"\\nTotal de tecnologias: {len(dev.stack)}")`,
-  },
-];
+import { Play, RotateCcw, Copy, Check, Terminal, Sparkles, Loader2, Clock, CheckCircle2, AlertCircle } from 'lucide-react';
+import SectionHeader from './SectionHeader';
+import { PLAYGROUND_SNIPPETS } from '../data/portfolioData';
 
 declare global {
   interface Window {
@@ -67,198 +10,269 @@ declare global {
 }
 
 export default function Playground() {
-  const [code, setCode] = useState(EXAMPLES[0].code);
-  const [output, setOutput] = useState('Aguardando execução...');
+  const [selectedSnippetIdx, setSelectedSnippetIdx] = useState(0);
+  const [code, setCode] = useState(PLAYGROUND_SNIPPETS[0].code);
+  const [output, setOutput] = useState('Pronto para execução. Clique em "Executar Código" para rodar.');
   const [pyodide, setPyodide] = useState<any>(null);
-  const [loading, setLoading] = useState(false);
+  const [loadingPyodide, setLoadingPyodide] = useState(false);
   const [running, setRunning] = useState(false);
+  const [executionTime, setExecutionTime] = useState<number | null>(null);
   const [copied, setCopied] = useState(false);
-  const [activeExample, setActiveExample] = useState(0);
+  const [hasError, setHasError] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  const loadPyodideRuntime = useCallback(async () => {
-    if (pyodide) return;
-    setLoading(true);
-    setOutput('⏳ Carregando Python (Pyodide)... Primeira vez pode levar alguns segundos.');
-
+  const initPyodide = useCallback(async () => {
+    if (pyodide) return pyodide;
+    setLoadingPyodide(true);
+    setOutput('⏳ Inicializando runtime do Python (Pyodide via WebAssembly)... Pode levar alguns segundos no primeiro carregamento.');
     try {
-      // Load script
-      const script = document.createElement('script');
-      script.src = 'https://cdn.jsdelivr.net/pyodide/v0.25.1/full/pyodide.js';
-      document.head.appendChild(script);
-
-      await new Promise<void>((resolve, reject) => {
-        script.onload = () => resolve();
-        script.onerror = () => reject(new Error('Falha ao carregar Pyodide'));
-      });
+      if (!window.loadPyodide) {
+        const script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/pyodide/v0.25.1/full/pyodide.js';
+        document.head.appendChild(script);
+        await new Promise<void>((resolve, reject) => {
+          script.onload = () => resolve();
+          script.onerror = () => reject(new Error('Falha ao carregar script do Pyodide CDN'));
+        });
+      }
 
       const py = await window.loadPyodide({
         indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.25.1/full/',
       });
-
       setPyodide(py);
-      setOutput('✅ Python carregado! Clique em "Executar" para rodar seu código.');
-    } catch (err) {
-      setOutput('❌ Erro ao carregar Python. Tente recarregar a página.');
+      setOutput('✅ Pyodide carregado com sucesso! Clique em "Executar Código" para ver a saída.');
+      setHasError(false);
+      return py;
+    } catch (err: any) {
+      setOutput(`❌ Falha ao carregar ambiente Pyodide: ${err?.message || 'Verifique sua conexão'}`);
+      setHasError(true);
+      return null;
     } finally {
-      setLoading(false);
+      setLoadingPyodide(false);
     }
   }, [pyodide]);
 
-  const runCode = async () => {
-    if (!pyodide) {
-      await loadPyodideRuntime();
-      return;
+  const handleRunCode = async () => {
+    let py = pyodide;
+    if (!py) {
+      py = await initPyodide();
+      if (!py) return;
     }
 
     setRunning(true);
-    setOutput('');
+    setHasError(false);
+    setOutput('Executando script...');
+    const startTime = performance.now();
 
     try {
-      // Redirect stdout
-      pyodide.runPython(`
+      // Setup stdout redirection
+      py.runPython(`
 import sys
 from io import StringIO
 sys.stdout = StringIO()
 sys.stderr = StringIO()
-      `);
+`);
+      py.runPython(code);
+      const stdout = py.runPython('sys.stdout.getvalue()');
+      const stderr = py.runPython('sys.stderr.getvalue()');
+      const duration = performance.now() - startTime;
+      setExecutionTime(Math.round(duration));
 
-      pyodide.runPython(code);
-
-      const stdout = pyodide.runPython('sys.stdout.getvalue()');
-      const stderr = pyodide.runPython('sys.stderr.getvalue()');
-
-      setOutput(stdout || stderr || '(Nenhuma saída)');
+      if (stderr && stderr.trim()) {
+        setOutput(`${stdout ? stdout + '\n' : ''}${stderr}`);
+        setHasError(true);
+      } else {
+        setOutput(stdout || '(Script executado sem saída no stdout)');
+        setHasError(false);
+      }
     } catch (err: any) {
-      setOutput(`❌ Erro:\n${err.message || err}`);
+      const duration = performance.now() - startTime;
+      setExecutionTime(Math.round(duration));
+      setOutput(`❌ Erro de Execução (Traceback):\n${err?.message || err}`);
+      setHasError(true);
     } finally {
       setRunning(false);
     }
   };
 
-  const copyCode = () => {
+  const handleCopyCode = () => {
     navigator.clipboard.writeText(code);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
-  return (
-    <section id="playground" className="relative py-24 overflow-hidden">
-      <div className="absolute inset-0 code-bg" />
-      <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl" />
-      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-500/5 rounded-full blur-3xl" />
+  const handleSelectSnippet = (idx: number) => {
+    setSelectedSnippetIdx(idx);
+    setCode(PLAYGROUND_SNIPPETS[idx].code);
+    setOutput('Snippet carregado. Clique em "Executar Código".');
+    setExecutionTime(null);
+    setHasError(false);
+  };
 
-      <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-        <SectionHeading
-          badge="Diferencial"
+  const handleResetSnippet = () => {
+    setCode(PLAYGROUND_SNIPPETS[selectedSnippetIdx].code);
+    setOutput('Código redefinido para o snippet original.');
+    setExecutionTime(null);
+    setHasError(false);
+  };
+
+  const lineCount = code.split('\n').length;
+  const lineNumbers = Array.from({ length: Math.max(lineCount, 1) }, (_, i) => i + 1);
+
+  return (
+    <section id="playground" className="py-20 bg-slate-950/80 relative border-t border-slate-900">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <SectionHeader
+          badge="WebAssembly / Pyodide"
           title="Playground"
-          highlight="Python ao vivo"
-          subtitle="Isso não é uma simulação — é Python real rodando no seu navegador via WebAssembly (Pyodide)"
+          highlight="Python ao Vivo"
+          subtitle="Execute código Python real diretamente no seu navegador, sem simulações ou dependência de servidor externo."
         />
 
-        {/* Examples selector */}
-        <div className="flex flex-wrap gap-2 mb-6 justify-center">
-          {EXAMPLES.map((ex, i) => (
+        {/* Snippet Picker Pills */}
+        <div className="flex flex-wrap items-center justify-center gap-2 mb-6">
+          {PLAYGROUND_SNIPPETS.map((snippet, idx) => (
             <button
-              key={ex.label}
-              onClick={() => {
-                setActiveExample(i);
-                setCode(ex.code);
-              }}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                activeExample === i
-                  ? 'bg-blue-500/20 text-blue-400 border border-blue-500/40'
-                  : 'bg-slate-800/50 text-slate-400 border border-slate-700/50 hover:border-slate-600'
+              key={snippet.id}
+              type="button"
+              onClick={() => handleSelectSnippet(idx)}
+              className={`px-3.5 py-2 rounded-xl text-xs font-mono transition-all ${
+                selectedSnippetIdx === idx
+                  ? 'bg-sky-500 text-slate-950 font-bold shadow-md shadow-sky-500/20'
+                  : 'bg-slate-900/80 text-slate-300 hover:text-white border border-slate-800 hover:border-slate-700'
               }`}
             >
-              {ex.label}
+              {snippet.title}
             </button>
           ))}
         </div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="glass-card rounded-2xl overflow-hidden"
-        >
-          {/* Editor Header */}
-          <div className="flex items-center justify-between px-4 py-3 bg-slate-900/80 border-b border-slate-700/50">
+        {/* Editor & Console Container */}
+        <div className="surface-card-static rounded-2xl overflow-hidden border border-slate-800 shadow-2xl">
+          {/* Editor Toolbar */}
+          <div className="px-4 py-3 bg-slate-900 border-b border-slate-800 flex items-center justify-between flex-wrap gap-2">
             <div className="flex items-center gap-3">
               <div className="flex gap-1.5">
-                <div className="w-3 h-3 rounded-full bg-red-500/80" />
-                <div className="w-3 h-3 rounded-full bg-yellow-500/80" />
-                <div className="w-3 h-3 rounded-full bg-green-500/80" />
+                <span className="w-3 h-3 rounded-full bg-rose-500/80" />
+                <span className="w-3 h-3 rounded-full bg-amber-500/80" />
+                <span className="w-3 h-3 rounded-full bg-emerald-500/80" />
               </div>
-              <span className="text-xs text-slate-500 font-mono">playground.py</span>
+              <span className="text-xs font-mono text-slate-400 font-semibold flex items-center gap-1.5">
+                <Terminal size={14} className="text-sky-400" />
+                <span>playground.py</span>
+              </span>
             </div>
+
             <div className="flex items-center gap-2">
               <button
-                onClick={copyCode}
-                className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-700/50 transition-all"
+                type="button"
+                onClick={handleCopyCode}
+                className="px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 hover:text-white text-xs font-mono flex items-center gap-1.5 border border-slate-700/60 transition-colors"
                 title="Copiar código"
               >
-                {copied ? <Check size={16} className="text-green-400" /> : <Copy size={16} />}
+                {copied ? <Check size={13} className="text-emerald-400" /> : <Copy size={13} />}
+                <span>{copied ? 'Copiado' : 'Copiar'}</span>
               </button>
+
               <button
-                onClick={() => {
-                  setCode(EXAMPLES[activeExample].code);
-                  setOutput('Aguardando execução...');
-                }}
-                className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-700/50 transition-all"
-                title="Resetar"
+                type="button"
+                onClick={handleResetSnippet}
+                className="px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 hover:text-white text-xs font-mono flex items-center gap-1.5 border border-slate-700/60 transition-colors"
+                title="Restaurar snippet"
               >
-                <RotateCcw size={16} />
+                <RotateCcw size={13} />
+                <span>Restaurar</span>
               </button>
             </div>
           </div>
 
-          {/* Code Area */}
-          <div className="relative">
-            <textarea
-              ref={textareaRef}
-              value={code}
-              onChange={e => setCode(e.target.value)}
-              spellCheck={false}
-              className="w-full min-h-[250px] p-6 bg-transparent text-green-300 font-mono text-sm leading-relaxed resize-y focus:outline-none"
-              style={{ tabSize: 4 }}
-            />
+          {/* Code Editor Body */}
+          <div className="grid lg:grid-cols-12 min-h-[360px] bg-slate-950">
+            {/* Left: Code Area (7 cols) */}
+            <div className="lg:col-span-7 flex border-b lg:border-b-0 lg:border-r border-slate-800 relative bg-slate-950">
+              {/* Line Numbers */}
+              <div className="select-none py-4 px-3 bg-slate-950/80 text-right text-slate-600 font-mono text-xs border-r border-slate-900 w-11 flex-shrink-0 leading-[1.6]">
+                {lineNumbers.map((n) => (
+                  <div key={n}>{n}</div>
+                ))}
+              </div>
+
+              {/* Textarea */}
+              <textarea
+                ref={textareaRef}
+                value={code}
+                onChange={(e) => setCode(e.target.value)}
+                spellCheck={false}
+                className="w-full h-full p-4 bg-transparent text-sky-200 font-mono text-xs leading-[1.6] resize-none focus:outline-none focus:ring-0 selection:bg-sky-500/30"
+                style={{ tabSize: 4 }}
+              />
+            </div>
+
+            {/* Right: Output Console (5 cols) */}
+            <div className="lg:col-span-5 flex flex-col bg-slate-950/90">
+              <div className="px-4 py-2.5 bg-slate-900/70 border-b border-slate-800/80 flex items-center justify-between text-xs">
+                <span className="font-mono text-slate-400 flex items-center gap-1.5">
+                  <Terminal size={13} />
+                  <span>Console Output</span>
+                </span>
+                {executionTime !== null && (
+                  <span className="text-[11px] font-mono text-slate-400 flex items-center gap-1">
+                    <Clock size={11} className="text-sky-400" />
+                    <span>{executionTime}ms</span>
+                  </span>
+                )}
+              </div>
+
+              <div className="p-4 flex-1 overflow-auto font-mono text-xs leading-relaxed max-h-[300px] lg:max-h-none">
+                <pre className={`whitespace-pre-wrap ${hasError ? 'text-rose-400' : 'text-emerald-300'}`}>
+                  {output}
+                </pre>
+              </div>
+            </div>
           </div>
 
-          {/* Run Button */}
-          <div className="px-4 py-3 border-t border-slate-700/50 flex items-center justify-between">
-            <span className="text-xs text-slate-500 font-mono">
-              {pyodide ? '🟢 Python pronto' : '🟡 Clique para carregar Python'}
-            </span>
+          {/* Action Bar Footer */}
+          <div className="px-4 py-3 bg-slate-900 border-t border-slate-800 flex items-center justify-between flex-wrap gap-3">
+            <div className="flex items-center gap-2 text-xs font-mono">
+              {pyodide ? (
+                <span className="inline-flex items-center gap-1.5 text-emerald-400">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400" />
+                  <span>Runtime Python Pronto</span>
+                </span>
+              ) : loadingPyodide ? (
+                <span className="inline-flex items-center gap-1.5 text-amber-400 animate-pulse">
+                  <Loader2 size={13} className="animate-spin" />
+                  <span>Carregando Pyodide WASM...</span>
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1.5 text-slate-400">
+                  <span className="w-2 h-2 rounded-full bg-slate-500" />
+                  <span>Python pronto para inicializar</span>
+                </span>
+              )}
+            </div>
+
             <button
-              onClick={runCode}
-              disabled={running || loading}
-              className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-green-600 to-emerald-500 text-white font-semibold rounded-lg hover:shadow-lg hover:shadow-green-500/25 transition-all disabled:opacity-50 disabled:cursor-wait"
+              id="playground-run-btn"
+              type="button"
+              onClick={handleRunCode}
+              disabled={running || loadingPyodide}
+              className="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 disabled:bg-slate-800 text-slate-950 disabled:text-slate-500 font-bold text-xs flex items-center gap-2 transition-all shadow-md shadow-emerald-500/20 disabled:shadow-none cursor-pointer disabled:cursor-not-allowed"
             >
-              {running || loading ? (
+              {running || loadingPyodide ? (
                 <>
-                  <Loader2 size={16} className="animate-spin" />
-                  {loading ? 'Carregando...' : 'Executando...'}
+                  <Loader2 size={15} className="animate-spin" />
+                  <span>{loadingPyodide ? 'Carregando Pyodide...' : 'Executando...'}</span>
                 </>
               ) : (
                 <>
-                  <Play size={16} />
-                  Executar
+                  <Play size={15} className="fill-slate-950" />
+                  <span>Executar Código</span>
                 </>
               )}
             </button>
           </div>
-
-          {/* Output */}
-          <div className="border-t border-slate-700/50">
-            <div className="px-4 py-2 bg-slate-900/50 border-b border-slate-700/30">
-              <span className="text-xs font-mono text-slate-400">📟 Saída / Console</span>
-            </div>
-            <pre className="p-6 font-mono text-sm text-slate-300 min-h-[100px] max-h-[300px] overflow-auto whitespace-pre-wrap">
-              {output}
-            </pre>
-          </div>
-        </motion.div>
+        </div>
       </div>
     </section>
   );

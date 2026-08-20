@@ -1,120 +1,137 @@
-import { motion } from 'framer-motion';
-import { useInView } from 'react-intersection-observer';
-import SectionHeading from './SectionHeading';
+import { useState } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
+import { Code2, Server, Database, GitBranch, Layout, Sparkles, Terminal, CheckCircle2, Cpu, Filter } from 'lucide-react';
+import SectionHeader from './SectionHeader';
+import { SKILLS_DATA } from '../data/portfolioData';
+import { Skill } from '../types';
 
-interface Skill {
-  name: string;
-  level: number; // 0-100
-  color: string;
-  icon: string;
-}
-
-const skillCategories = [
-  {
-    title: 'Linguagens',
-    skills: [
-      { name: 'Python', level: 85, color: '#3776ab', icon: '🐍' },
-      { name: 'JavaScript', level: 65, color: '#f7df1e', icon: '⚡' },
-      { name: 'HTML5', level: 80, color: '#e34f26', icon: '🌐' },
-      { name: 'CSS3', level: 70, color: '#1572b6', icon: '🎨' },
-      { name: 'SQL', level: 60, color: '#00758f', icon: '🗃️' },
-    ],
-  },
-  {
-    title: 'Frameworks & Tools',
-    skills: [
-      { name: 'Flask', level: 70, color: '#000000', icon: '🧪' },
-      { name: 'FastAPI', level: 65, color: '#009688', icon: '🚀' },
-      { name: 'Git / GitHub', level: 75, color: '#f05032', icon: '📦' },
-      { name: 'React', level: 40, color: '#61dafb', icon: '⚛️' },
-      { name: 'Pyodide/WASM', level: 50, color: '#654ff0', icon: '🔧' },
-    ],
-  },
-  {
-    title: 'Soft Skills',
-    skills: [
-      { name: 'Resolução de Problemas', level: 85, color: '#10b981', icon: '🧠' },
-      { name: 'Aprendizado Rápido', level: 90, color: '#3b82f6', icon: '📚' },
-      { name: 'Comunicação', level: 75, color: '#8b5cf6', icon: '💬' },
-      { name: 'Trabalho em Equipe', level: 80, color: '#f59e0b', icon: '🤝' },
-      { name: 'Organização', level: 70, color: '#ec4899', icon: '📋' },
-    ],
-  },
+const CATEGORIES = [
+  { id: 'all', label: 'Todas as Tecnologias' },
+  { id: 'backend', label: 'Backend & Python' },
+  { id: 'database', label: 'Banco de Dados' },
+  { id: 'frontend', label: 'Frontend & Web' },
+  { id: 'tools', label: 'Ferramentas & Git' },
+  { id: 'fundamentals', label: 'Fundamentos' },
 ];
 
-function SkillBar({ skill, delay }: { skill: Skill; delay: number }) {
-  const { ref, inView } = useInView({ triggerOnce: true });
-
-  return (
-    <motion.div
-      ref={ref}
-      initial={{ opacity: 0, x: -20 }}
-      animate={inView ? { opacity: 1, x: 0 } : {}}
-      transition={{ duration: 0.5, delay }}
-      className="group"
-    >
-      <div className="flex justify-between items-center mb-2">
-        <div className="flex items-center gap-2">
-          <span className="text-lg">{skill.icon}</span>
-          <span className="text-sm font-semibold text-slate-200 group-hover:text-white transition-colors">
-            {skill.name}
-          </span>
-        </div>
-        <span className="text-xs font-mono text-slate-400">{skill.level}%</span>
-      </div>
-      <div className="h-2.5 rounded-full bg-slate-800/80 overflow-hidden">
-        <motion.div
-          initial={{ width: 0 }}
-          animate={inView ? { width: `${skill.level}%` } : { width: 0 }}
-          transition={{ duration: 1.2, delay: delay + 0.2, ease: 'easeOut' }}
-          className="h-full rounded-full relative"
-          style={{
-            background: `linear-gradient(90deg, ${skill.color}88, ${skill.color})`,
-          }}
-        >
-          <div className="absolute inset-0 rounded-full opacity-50" style={{
-            background: `linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)`,
-            animation: 'shimmer 2s infinite',
-          }} />
-        </motion.div>
-      </div>
-    </motion.div>
-  );
-}
-
 export default function Skills() {
+  const [selectedCategory, setSelectedCategory] = useState('all');
+
+  const filteredSkills = selectedCategory === 'all'
+    ? SKILLS_DATA
+    : SKILLS_DATA.filter((s) => s.category === selectedCategory);
+
+  const getCategoryBadge = (category: Skill['category']) => {
+    switch (category) {
+      case 'backend':
+        return { label: 'Backend', color: 'bg-sky-500/10 text-sky-400 border-sky-500/20' };
+      case 'database':
+        return { label: 'Dados', color: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' };
+      case 'frontend':
+        return { label: 'Frontend', color: 'bg-amber-500/10 text-amber-400 border-amber-500/20' };
+      case 'tools':
+        return { label: 'Tools', color: 'bg-purple-500/10 text-purple-400 border-purple-500/20' };
+      case 'fundamentals':
+        return { label: 'Fundamentos', color: 'bg-blue-500/10 text-blue-400 border-blue-500/20' };
+    }
+  };
+
   return (
-    <section id="skills" className="relative py-24 overflow-hidden">
-      <div className="absolute inset-0 dot-bg" />
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <SectionHeading
-          badge="Tech Stack"
+    <section id="skills" className="py-20 bg-slate-950/60 relative border-t border-slate-900">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <SectionHeader
+          badge="Stack Tecnológica"
           title="Minhas"
-          highlight="Habilidades"
-          subtitle="Tecnologias e ferramentas que utilizo no dia a dia"
+          highlight="Habilidades & Ferramentas"
+          subtitle="Conjunto de tecnologias que estudo, aplico em projetos e aprimoro continuamente."
         />
 
-        <div className="grid md:grid-cols-3 gap-8">
-          {skillCategories.map((cat, ci) => (
-            <motion.div
-              key={cat.title}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: ci * 0.15 }}
-              className="glass-card rounded-2xl p-6"
-            >
-              <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
-                <div className="w-8 h-1 rounded-full bg-gradient-to-r from-blue-500 to-cyan-400" />
-                {cat.title}
-              </h3>
-              <div className="space-y-5">
-                {cat.skills.map((skill, si) => (
-                  <SkillBar key={skill.name} skill={skill} delay={si * 0.08} />
-                ))}
-              </div>
-            </motion.div>
-          ))}
+        {/* Category Filters */}
+        <div className="flex flex-wrap items-center justify-center gap-2 mb-10">
+          {CATEGORIES.map((cat) => {
+            const isSelected = selectedCategory === cat.id;
+            return (
+              <button
+                key={cat.id}
+                type="button"
+                onClick={() => setSelectedCategory(cat.id)}
+                className={`px-4 py-2 rounded-xl text-xs font-medium transition-all ${
+                  isSelected
+                    ? 'bg-sky-500 text-slate-950 font-bold shadow-md shadow-sky-500/20'
+                    : 'bg-slate-900/80 text-slate-400 hover:text-slate-200 border border-slate-800 hover:border-slate-700'
+                }`}
+              >
+                {cat.label}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Skills Cards Grid */}
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <AnimatePresence mode="popLayout">
+            {filteredSkills.map((skill) => {
+              const badge = getCategoryBadge(skill.category);
+              return (
+                <motion.div
+                  key={skill.name}
+                  layout
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  transition={{ duration: 0.2 }}
+                  className="p-5 rounded-2xl bg-slate-900/50 border border-slate-800/80 hover:border-slate-700 transition-all flex flex-col justify-between group"
+                >
+                  <div>
+                    <div className="flex items-center justify-between gap-2 mb-3">
+                      <div className="flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-sky-400" />
+                        <h3 className="font-bold text-white text-base group-hover:text-sky-300 transition-colors">
+                          {skill.name}
+                        </h3>
+                      </div>
+                      <span className={`px-2.5 py-0.5 rounded-md text-[11px] font-mono border ${badge.color}`}>
+                        {badge.label}
+                      </span>
+                    </div>
+
+                    <p className="text-xs text-slate-400 leading-relaxed mb-4">
+                      {skill.description}
+                    </p>
+                  </div>
+
+                  <div className="pt-3 border-t border-slate-800/60 flex items-center justify-between text-xs">
+                    <span className="text-slate-500 font-mono text-[11px]">Nível</span>
+                    <span className="px-2 py-0.5 rounded bg-slate-800 text-slate-300 font-medium text-[11px]">
+                      {skill.level}
+                    </span>
+                  </div>
+                </motion.div>
+              );
+            })}
+          </AnimatePresence>
+        </div>
+
+        {/* Highlight Banner */}
+        <div className="mt-10 p-5 rounded-2xl bg-gradient-to-r from-slate-900 via-sky-950/30 to-slate-900 border border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-400 flex-shrink-0">
+              <Terminal size={20} />
+            </div>
+            <div>
+              <h4 className="text-sm font-bold text-white">Diferencial Técnico em Python</h4>
+              <p className="text-xs text-slate-400">
+                Experiência com Pyodide para executar Python nativo no navegador do usuário via WebAssembly.
+              </p>
+            </div>
+          </div>
+
+          <a
+            href="#playground"
+            className="px-4 py-2 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-semibold text-xs transition-colors whitespace-nowrap"
+          >
+            Experimentar no Playground
+          </a>
         </div>
       </div>
     </section>
